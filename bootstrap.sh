@@ -49,6 +49,7 @@
 #                               h3_singularity_2pass_ui.json.  Implied by PROFILE=all
 #                               and PROFILE=stock-graphA, which fetch it anyway.
 #    WANT_MONITOR=0             skip Crystools + rgthree (the VRAM bar and progress bar)
+#    WANT_UI_PREFS=0            leave frontend settings alone (default: straight/square links)
 #    WANT_SAGE=1                also update KJNodes to its pin and pip install
 #                               sageattention (needed only if the graph's
 #                               MiniMaxH3MemoryEfficientSageAttentionPatch node is
@@ -1009,6 +1010,42 @@ NEXT
 # =============================================================================
 step "5. ComfyUI"
 # =============================================================================
+# ---------------------------------------------------------------------------- UI settings
+# Jake's frontend preferences, written before ComfyUI starts so the first page load already
+# has them. Merged into whatever is there, never a blind overwrite. WANT_UI_PREFS=0 skips.
+#   Comfy.LinkRenderMode  0 straight ("square piping" - Jake's preference) | 1 linear
+#                         2 spline (the default "noodles") | 3 hidden
+if [ "${WANT_UI_PREFS:-1}" = "1" ]; then
+  SETTINGS="$COMFY_DIR/user/default/comfy.settings.json"
+  mkdir -p "$(dirname "$SETTINGS")"
+  if "$PY" - "$SETTINGS" <<'PYSET'
+import json, os, sys
+p = sys.argv[1]
+want = {"Comfy.LinkRenderMode": 0}
+cur = {}
+if os.path.isfile(p):
+    try:
+        with open(p, encoding="utf-8-sig") as fh:
+            cur = json.load(fh)
+    except Exception:
+        cur = {}                      # unreadable: start clean rather than fail the bootstrap
+changed = [k for k, v in want.items() if cur.get(k) != v]
+cur.update(want)
+if changed:
+    with open(p, "w", encoding="utf-8") as fh:
+        json.dump(cur, fh, indent=1, ensure_ascii=False)
+print(",".join(changed) if changed else "")
+PYSET
+  then
+    ok "UI settings  : square link rendering"
+    sum "UI prefs     : Comfy.LinkRenderMode=0 (straight links)"
+  else
+    warn "could not write $SETTINGS -- set Link Render Mode to Straight in the UI instead"
+  fi
+else
+  skip "WANT_UI_PREFS=0 -- leaving frontend settings alone"
+fi
+
 if [ "$START_COMFY" = "0" ]; then
   skip "START_COMFY=0 / --no-start -- not starting ComfyUI"
   info "start it by hand with:  cd $COMFY_DIR && source ${VENV_DIR#"$COMFY_DIR/"}/bin/activate && python main.py --listen 0.0.0.0 --port 8188 --enable-cors-header"

@@ -48,6 +48,7 @@
 #                               you un-bypass the depth group (nodes 20-23) of
 #                               h3_singularity_2pass_ui.json.  Implied by PROFILE=all
 #                               and PROFILE=stock-graphA, which fetch it anyway.
+#    WANT_MONITOR=0             skip Crystools + rgthree (the VRAM bar and progress bar)
 #    WANT_SAGE=1                also update KJNodes to its pin and pip install
 #                               sageattention (needed only if the graph's
 #                               MiniMaxH3MemoryEfficientSageAttentionPatch node is
@@ -99,6 +100,11 @@ PACKS=(
   "Comfyui_Minimax_h3_latent_Upscaler|https://github.com/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler|40316cf008b2fd8663263270669eb4da23f89d2c|-|singularity-2pass|-"
   "ComfyUI-VideoHelperSuite|https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite|4d907bee61e92c2e65af3bd6383a4e4d356126d1|-|both|-"
   "ComfyUI-KJNodes|https://github.com/kijai/ComfyUI-KJNodes|d3cfe21625e5170126ce06fbfcfe1d88108688c3|-|singularity-2pass|WANT_SAGE"
+  # Monitoring, so the pod looks like Jake's local ComfyUI: Crystools draws the
+  # CPU/RAM/GPU/VRAM bar across the top, rgthree the per-node progress bar and a
+  # readable queue. Set WANT_MONITOR=0 to skip them.
+  "ComfyUI-Crystools|https://github.com/crystian/ComfyUI-Crystools|2f18256c5b5063937106f29a8e0a7db3ae3869b7|-|both|MONITOR"
+  "rgthree-comfy|https://github.com/rgthree/rgthree-comfy|2c5342a8cb0eaecaabf61435a5f37dd594c510ba|-|both|MONITOR"
 )
 
 # Hugging Face revisions, pinned.  Comfy-Org/MiniMax-H3 was modified on
@@ -165,6 +171,9 @@ BAKED_DIR="${BAKED_DIR:-/opt/comfyui-baked}"
 NETVOL_MODELS="${NETVOL_MODELS:-/workspace/models}"
 DL_JOBS="${DL_JOBS:-3}"
 WANT_SAGE="${WANT_SAGE:-0}"
+# Crystools + rgthree: the VRAM/CPU bar and the per-node progress bar, so a pod
+# looks like Jake's local ComfyUI. On by default; WANT_MONITOR=0 turns them off.
+MONITOR="${WANT_MONITOR:-1}"
 ALLOW_DOWNGRADE="${ALLOW_DOWNGRADE:-0}"
 SINGULARITY_UNET="${SINGULARITY_UNET:-pruned_int8}"
 SKIP_COMFY_UPGRADE=0

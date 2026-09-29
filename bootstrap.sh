@@ -130,7 +130,7 @@ build_model_list() {
   MODELS=(
     # ---- singularity-2pass ------------------------------------------------
     "singularity-2pass|WarmBloodAban/Minimax-h3_Singularity|$HF_REV_SINGULARITY|$sing_file|diffusion_models|-|$sing_bytes"
-    "singularity-2pass|Comfy-Org/MiniMax-H3|$HF_REV_COMFYORG|vae/minimax_h3_video_vae_int8_convrot.safetensors|vae|-|2811065184"
+    "singularity-2pass|Comfy-Org/MiniMax-H3|$HF_REV_COMFYORG|vae/minimax_h3_video_vae_fp16.safetensors|vae|-|5207808496"
     # The latent upscaler's HF path has an extra folder level; the file is stored
     # under its real basename, which is exactly what the merged graph's
     # MinimaxH3LatentUpscaler3D widget names. NOT renamed -- the short name
@@ -981,7 +981,7 @@ if wanted_profile "singularity-2pass"; then
       flag "Singularity UNET = w4a8 (11.77 GB, quality cost UNVERIFIED), NOT the file the repo graph's UNETLoader names. Point node 10 at it: --set 10.unet_name=Minimax-h3_Singularity_ref2va_v1.3_Pruned_w4a8.safetensors  -- or re-run with SINGULARITY_UNET=pruned_int8 and change nothing."
       ;;
   esac
-  flag "Video VAE: this kit takes Comfy-Org's minimax_h3_video_vae_int8_convrot.safetensors (2,811,065,184 B). The downloaded README points at Kijai/MiniMax-H3-experimental's file of the SAME NAME but 3,171,670,912 B. If a first render looks wrong, that is the first thing to try."
+  flag "Video VAE: fp16 (5,207,808,496 B), NOT the int8_convrot file the downloaded README names. MEASURED 2026-09-29 on an A100 pod: the int8 VAE dies in VAE decode with 'detect_k_anchor kernel launch failed: CUDA driver version is insufficient for CUDA runtime version' (comfy/ldm/minimax/vae.py -> comfy_kitchen int8_attention). Runpod driver was 570.172.08. fp16 costs 2.4 GB more and needs no int8 kernels; on an 80 GB card there is no reason to want int8."
   flag "MiniMaxH3NativeAudioLock has NO license anywhere in the Shrek3OnVH5 repo. 71 lines, no weights, but the film is monetized. MIT alternative badgids/ComfyUI-H3-ExactAudioLock is not a drop-in (different class key)."
 fi
 flag "MiniMax authorization for Firestarter Media LLC is on file (api@minimax.io, 2026-09-29). Open: does a third-party fine-tune (Singularity) count as an 'H3 Work'? One line to api@minimax.io settles it."
